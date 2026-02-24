@@ -1,27 +1,39 @@
 % Sudoku Solver
 %
 % Hints:
-% For subgrid of size n, subgrids can be identified by labels 1..n*n
-% A cell (x,y) can be mapped to the subgrid labeled 1+(((x-1)/n)*n+(y-1)/n)
+% For subgrid of size sub_n, subgrids can be identified by labels 1..sub_n*sub_n
+% A cell (x,y) can be mapped to the subgrid labeled 1+(((x-1)/sub_n)*sub_n+(y-1)/sub_n)
 
 % Your implementation please...
-#const n = 4.
-#const block = 2.
-sudoku(X,Y,Z) :- initial(X,Y,Z).
-% Achieved: All initial cells are loaded into the sudoku set
 
-{ sudoku(X,Y,Z): Z = 1..n} = 1 :- X = 1..n, Y = 1..n.
 
-:- sudoku(X1, Y1, Z1), sudoku(X2, Y2, Z2), X1 != X2, Y1 = Y2, Z1 = Z2.
-%Achieved: Checks if there is a duplicate value on a given column and removes it
+%* FACTS *%
+#const n = 4. % grid length
+#const sub_n = 2. % subgrid length
 
-:- sudoku(X1, Y1, Z1), sudoku(X2, Y2, Z2), X1 = X2, Y1 != Y2, Z1 = Z2.
-%Achieved: Checks if there is duplicate value on a given row and removes it
+sudoku(X,Y,N) :- initial(X,Y,N). % initialize sudoku instance
 
-subgrid(X, Y, G) :- G = 1+( ((X-1)/block)*block + (Y-1)/block ), X = 1..n, Y = 1..n.
 
-% Achieved: All cells are mapped to a single subgrid of size n
 
-:- sudoku(X1, Y1, Z), sudoku(X2, Y2, Z), subgrid(X1, Y1, N), subgrid(X2, Y2, N), (X1, Y1) != (X2, Y2).
+%* GENERATE *%
+{ sudoku(X,Y,N) : N = 1..n } = 1 :- X = 1..n, Y = 1..n.
+% achieved: each sudoku square has a number from 1-n
+
+subgrid(X,Y,G) :- G = 1+(((X-1)/sub_n)*sub_n+(Y-1)/sub_n) , X = 1..n, Y = 1..n.
+% achieved: assigned sudoku subgrids
+
+
+
+%* CONSTRAINTS *%
+:- sudoku(X1,Y1,N), sudoku(X1,Y2,N), sudoku(X1,Y1,N) != sudoku(X1,Y2,N).
+% achieved: squares in the same ROW w/ same number are terminated.
+
+:- sudoku(X1,Y1,N), sudoku(X2,Y1,N), sudoku(X1,Y1,N) != sudoku(X2,Y1,N).
+% achieved: squares in the same COLUMN w/ same number are terminated.
+
+:- subgrid(X1,Y1,G), subgrid(X2,Y2,G), sudoku(X1,Y1,N), sudoku(X2,Y2,N), X1 != X2, Y1 != Y2.
+% achieved: squares in the same subgrid, w/ same number, and different positions are terminated.
+
+
 
 #show sudoku/3.
